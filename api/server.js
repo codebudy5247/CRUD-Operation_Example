@@ -1,7 +1,9 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const path = require('path')
 const jwt = require("jsonwebtoken");
 const { Router } = require("express");
+const auth = require('./middleware/jwtAuth')
 
 const app = express();
 
@@ -9,6 +11,8 @@ const PORT = 5000;
 
 app.use(express.json());
 
+
+//DATA
 let users = [
   {
     userName: "Mark",
@@ -45,9 +49,14 @@ app.get("/", (req, res) => {
 });
 
 //Get users
-app.get("/users", (request, response) => {
+app.get("/users", auth,(request, response) => {
   response.json(users);
 });
+
+//Get a secret page
+app.get('/secret',auth,(req,res)=>{
+   res.sendFile(path.join(__dirname,'./public/index.html'))
+})
 
 //REGISTER
 app.post("/register", async (req, res) => {
