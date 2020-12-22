@@ -1,0 +1,16 @@
+{
+  "name": "crud-operation_example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon api/server.js"
+  },
+  "keywords": [],
+  "author": "aditya shekhar <a.shekhar5247@gmail.com> (http://github.com/codebudy5247)",
+  "license": "MIT",
+  "devDependencies": {
+    "express": "4.17.1",
+    "nodemon": "2.0.6"
+  }
+}
