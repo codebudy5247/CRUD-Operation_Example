@@ -1,4 +1,7 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { Router } = require("express");
 
 const app = express();
 
@@ -8,31 +11,23 @@ app.use(express.json());
 
 let users = [
   {
-    id: 1,
-    firstName: "Mark",
-    lastName: "Brown",
-    "email":"mark@example.com",
+    userName: "Mark",
+    email: "mark@example.com",
     password: "123456",
   },
   {
-    id: 2,
-    firstName: "Steve",
-    lastName: "Smith",
-    "email":"steve@example.com",
+    userName: "Steve Smith",
+    email: "steve@example.com",
     password: "123456",
   },
   {
-    id: 3,
-    firstName: "Jane",
-    lastName: "Doe",
-    "email":"jane@example.com",
+    userName: "Jane Doe",
+    email: "jane@example.com",
     password: "123456",
   },
   {
-    id: 4,
-    firstName: "John",
-    lastName: "Doe",
-    "email":"john@example.com",
+    userName: "John Doe",
+    email: "john@example.com",
     password: "123456",
   },
 ];
@@ -49,42 +44,30 @@ app.get("/users", (request, response) => {
   response.json(users);
 });
 
-//Get users by id
-app.get("/users/:id", (request, response) => {
-  const accountId = Number(request.params.id);
-  const getUsers = users.find((users) => users.id === accountId);
 
-  if (!getUsers) {
-    response.status(500).send("Account not found.");
-  } else {
-    response.json(getUsers);
+//REGISTER
+app.post("/register", async (req, res) => {
+  const { userName, email, password } = req.body;
+  const userExists = users.find((users) => users.email === email);
+
+  if (userExists) {
+    res.status(400).json({
+      message: "User Already exist",
+    });
   }
+  const newdata = {
+    userName,
+    email,
+    password,
+  };
+  console.log(newdata);
+  const salt = await bcrypt.genSalt(10);
+  newdata.password = await bcrypt.hash(password, salt);
+  users.push(newdata);
+  res.status(200).json(newdata);
 });
 
-app.post("/users", (request, response) => {
-  const registerUser = request.body;
 
-  users.push(registerUser);
-
-  response.json(users);
-});
-
-app.put("/users/:id", (request, response) => {
-  const userId = Number(request.params.id);
-  const body = request.body;
-  const user = users.find((users) => users.id === userId);
-  const index = users.indexOf(users);
-
-  if (!users) {
-    response.status(500).send("User not found.");
-  } else {
-    const updatedUser = { ...user, ...body };
-
-    users[index] = updatedUser;
-
-    response.send(updatedUser);
-  }
-});
 
 app.listen(PORT, () => {
   console.log(`Server Up and running on PORT ${PORT}`);
