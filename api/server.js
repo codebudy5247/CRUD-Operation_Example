@@ -13,23 +13,28 @@ let users = [
   {
     userName: "Mark",
     email: "mark@example.com",
-    password: "123456",
+    password: bcrypt.hashSync('123456',10),
   },
   {
     userName: "Steve Smith",
     email: "steve@example.com",
-    password: "123456",
+    password: bcrypt.hashSync('123456',10),
   },
   {
     userName: "Jane Doe",
     email: "jane@example.com",
-    password: "123456",
+    password: bcrypt.hashSync('123456',10),
   },
   {
     userName: "John Doe",
     email: "john@example.com",
-    password: "123456",
+    password: bcrypt.hashSync('123456',10)
   },
+  {
+    "userName": "Captain Marvel",
+    "email": "captain@example.com",
+    "password": bcrypt.hashSync('123456',10)
+  }
 ];
 
 //ROUTES
@@ -43,7 +48,6 @@ app.get("/", (req, res) => {
 app.get("/users", (request, response) => {
   response.json(users);
 });
-
 
 //REGISTER
 app.post("/register", async (req, res) => {
@@ -63,11 +67,35 @@ app.post("/register", async (req, res) => {
   console.log(newdata);
   const salt = await bcrypt.genSalt(10);
   newdata.password = await bcrypt.hash(password, salt);
+
   users.push(newdata);
   res.status(200).json(newdata);
 });
 
+//LOGIN
+app.post("/login", async (req, res) => {
+  const { email } = req.body;
+  //Checking email
+  const user = users.find((users) => users.email === email);
+  if (!user) return res.status(400).send("Email is not found");
 
+  //Checking password
+  const validPass = await bcrypt.compare(req.body.password, user.password);
+  console.log(req.body.password, user.password);
+  if (!validPass) return res.status(400).send("Invalid Password");
+
+  //Create and assign a token
+  const token = jwt.sign(
+    {
+      _id: user._id,
+    },
+    "abc123",
+    {
+      expiresIn: "1h",
+    }
+  );
+  res.send(token);
+});
 
 app.listen(PORT, () => {
   console.log(`Server Up and running on PORT ${PORT}`);
